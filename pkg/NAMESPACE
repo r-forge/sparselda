@@ -1,0 +1,16 @@
+export(
+       normalize,
+       normalizetest,
+       sda,
+       smda)
+
+
+S3method(sda,
+         default)
+
+S3method(predict,
+         sda)
+
+S3method(print,
+         sda)
+

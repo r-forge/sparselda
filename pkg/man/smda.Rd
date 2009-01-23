@@ -1,0 +1,93 @@
+\name{smda}
+\alias{smda}
+\title{Sparse mixture discriminant analysis}
+\description{Performs sparse linear discriminant analysis for mixture of gaussians models.}
+\usage{
+smda(X,Z,Rj,lambda=1e-6,stop,maxIte=50,trace=FALSE,tol=1e-4)
+}
+\arguments{
+  \item{X}{A matrix of the training data with observations down the rows and variables in the columns.}
+  \item{Z}{A matrix initializing the probabilities
+  representing the groups.}
+  \item{Rj}{K length vector containing the number of
+  subclasses in each of the K classes.}
+  \item{lambda}{The weight on the L2-norm for elastic net
+  regression. Default: 1e-6.}
+
+  \item{stop}{If STOP is negative, its absolute value
+  corresponds to the desired number of variables. If STOP is
+  positive, it corresponds to an upper bound on the L1-norm of the b
+  coefficients. There is a one to one correspondence between stop
+  and t.}
+
+  \item{maxIte}{Maximum number of iterations. Default: 50.}
+
+  \item{trace}{If TRUE, prints out its progress. Default: FALSE.}
+ 
+  \item{tol}{Tolerance for the stopping criterion (change in RSS). Default: 1e-4}
+}
+
+\value{Returns a list with the following attributes:
+\item{beta}{The loadings of the sparse discriminative
+directions.}
+
+\item{theta}{The optimal scores.}
+\item{Z}{Updated subclass probabilities.}
+
+\item{rss}{A vector of the Residual Sum of Squares at
+each iteration.}
+}
+\details{
+The function finds sparse directions for linear classification of mixture og gaussians models.
+}\references{
+Clemmensen, L., Hastie, T. and Ersboell, K. (2007) "Sparse discriminant
+analysis", Technical report, IMM, Technical University of Denmark
+}
+\seealso{
+\code{\link{normalize}}, \code{\link{normalizetest}}, \code{\link{sda}}
+}
+\author{Line Clemmensen}
+\examples{
+# load data
+data(penicilliumYES)
+X <- penicilliumYES$X
+Z <- penicilliumYES$Z
+
+# test samples
+Iout<-c(3,6,9,12)
+Iout<-c(Iout,Iout+12,Iout+24)
+# training data
+Xtr<-X[-Iout,]
+k<-3
+n<-dim(Xtr)[1]
+Rj <- c(4,4,4)
+
+# Normalize data
+Xc<-normalize(Xtr)
+Xn<-Xc$Xc
+p<-dim(Xn)[2]
+
+# perform SMDA with one non-zero loading for each discriminative
+# direction
+out<-smda(Xn,Z,Rj,lambda=1e-6,-5,maxIte=10,trace=TRUE,tol=1e-2)
+
+# training
+require("MASS")
+sl<-Xn\%*\%out$beta
+lobj<-lda(sl,c(rep(1,2),rep(2,2),rep(3,2),rep(4,2),rep(5,2),rep(6,2),rep(7,2),rep(8,2),rep(9,2),rep(10,2),rep(11,2),rep(12,2)))
+train <- predict(lobj, sl)
+
+# testing
+Xtst<-X[Iout,]
+Xtst<-normalizetest(Xtst,Xc)
+sltr<-Xtst\%*\%out$beta
+test <- predict(lobj, sltr, prior = lobj$prior, k)
+# class 1
+as.numeric(test$class)<5
+# class 2
+as.numeric(test$class)>=5&as.numeric(test$class)<9
+# class 3
+as.numeric(test$class)>=9
+}
+\keyword{classif}
+\keyword{multivariate}
