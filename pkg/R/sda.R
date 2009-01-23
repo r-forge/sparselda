@@ -12,7 +12,7 @@ sda.default <- function(x, y, lambda=1e-6, stop, maxIte=100, trace=FALSE, tol=1e
   ## InPUT:
   ## x      : matrix of n observations down the rows and p variable columns. The
   ##          columns are assumed normalized
-  ## y      : matrix initializing the dummy variables representing the groups
+  ## y      : matrix initializing the dummy variables representing the groups or a factor
   ## lambda : the weight on the L2-norm for elastic net regression. Default: 1e-6.
   ## stop   : If STOP is negative, its 
   ##          absolute value corresponds to the desired number of variables. If STOP
@@ -109,13 +109,16 @@ sda.default <- function(x, y, lambda=1e-6, stop, maxIte=100, trace=FALSE, tol=1e
     cat('final update, RSS: ', RSS,'\n')
   }
 
-  notZero <- which(b != 0)
-  b <- b[notZero]
+  notZero <- apply(b, 1, function(x) any(x != 0))
+  b <- b[notZero,]
+  origP <- ncol(x)
   x <- x[, notZero, drop = FALSE]
   varNames <- colnames(x)
+  
   sl <- x %*% b
   colnames(sl) <- paste("score", 1:ncol(sl), sep = "")
   lobj<-lda(sl,factorY, ...)
+  
   ## todo save fitted and probs (and data?) for predict
 
   structure(
@@ -123,8 +126,11 @@ sda.default <- function(x, y, lambda=1e-6, stop, maxIte=100, trace=FALSE, tol=1e
                  beta = b,
                  theta = theta,
                  varNames = varNames,
+                 varIndex = which(notZero),
+                 origP = origP,
                  rss = rss[1:ite],
                  fit = lobj,
+                 classes = classes,
                  lambda = lambda,
                  stop = stop),
             class = "sda")
@@ -136,33 +142,41 @@ print.sda <- function(x, digits = max(3, getOption("digits") - 3), ...)
 
 
     cat("lambda =", format(x$lambda, digits = digits),
-        "\n  stop =", format(x$stop, digits = digits),
+        "\nstop =", format(x$stop, digits = digits),
         "\n\n")
+
+    top <- if(!is.null(x$varNames)) x$varNames else paste("Predictor", x$varIndex, sep = "")
+    varOrder <- if(is.matrix(x$beta)) order(apply(abs(x$beta), 1, sum)) else order(abs(x$beta))
+    top <- top[varOrder]
+    top <- top[1:min(5, length(top))]
+    top <- paste(top, collapse = ", ")
     
-    top <- x$varNames[order(abs(x$beta))]
     if(length(x$beta) > 5)
       {
-        top <- top[1:5]
         cat("Top 5 predictors (out of ",
-            length(x$varNames),
+            length(x$varIndex),
             "):\n\t",
-            paste(top, collpase = ", "),
+            top,
             sep = "")
       } else {
         cat("Predictors:\n\t",
-            paste(top, collpase = ", "),
+            top,
             "\n",
             sep = "")
       }
-    
-    
     invisible(x)
   }
 
 predict.sda <- function(object, newdata = NULL, ...)
   {
     if(!is.matrix(newdata)) newdata <- as.matrix(newdata)
-    newdata <- newdata[, object$varNames, drop = FALSE]
+    if(!is.null(object$varNames))
+      {
+        newdata <- newdata[, object$varNames, drop = FALSE]
+      } else {
+        if(ncol(newdata) != object$origP) stop("dimensions of training and testing X different")
+        newdata <- newdata[, object$varIndex, drop = FALSE]
+      }
     x <- newdata %*% object$beta
     predict(object$fit, newdata = x, ...)
   }

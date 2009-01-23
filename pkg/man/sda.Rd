@@ -43,7 +43,8 @@ each iteration.}
 }
 \details{
 The function finds sparse directions for linear classification.
-}\references{
+}
+\references{
 Clemmensen, L., Hastie, T. and Ersboell, K. (2007) "Sparse discriminant
 analysis", Technical report, IMM, Technical University of Denmark
 }
@@ -52,40 +53,55 @@ analysis", Technical report, IMM, Technical University of Denmark
 }
 \author{Line Clemmensen}
 \examples{
-# load data
+## load data
 data(penicilliumYES)
+
 X <- penicilliumYES$X
 Y <- penicilliumYES$Y
+colnames(Y) <- c("P. Melanoconidium",
+                 "P. Polonicum",
+                 "P. Venetum")
 
-# test samples
+
+## test samples
 Iout<-c(3,6,9,12)
 Iout<-c(Iout,Iout+12,Iout+24)
-# training data
+
+## training data
 Xtr<-X[-Iout,]
 k<-3
 n<-dim(Xtr)[1]
 
-# Normalize data
+## Normalize data
 Xc<-normalize(Xtr)
 Xn<-Xc$Xc
 p<-dim(Xn)[2]
 
-# perform SDA with one non-zero loading for each discriminative
-# direction
-out <- sda(Xn,Y,lambda=1e-6,-1,maxIte=25,trace=TRUE)
+## Perform SDA with one non-zero loading for each discriminative
+## direction with Y as matrix input
+out <- sda(Xn, Y,
+           lambda = 1e-6,
+           stop = -1,
+           maxIte = 25,
+           trace = TRUE)
 
-# training
-require("MASS")
-sl<-Xn\%*\%out$beta
-lobj<-lda(sl,c(rep(1,n/k),rep(2,n/k),rep(3,n/k)))
-train <- predict(lobj,sl)
+## predict training samples
+train <- predict(out, Xn)
 
-# testing
+## testing
 Xtst<-X[Iout,]
 Xtst<-normalizetest(Xtst,Xc)
-sltr<-Xtst\%*\%out$beta
-test <- predict(lobj, sltr, prior = lobj$prior, k)
+
+test <- predict(out, Xtst)
 print(test$class)
+
+## Factor Y as input
+Yvec <- factor(rep(colnames(Y), each = 8))
+out2 <- sda(Xn, Yvec,
+            lambda = 1e-6,
+            stop = -1,
+            maxIte = 25,
+            trace = TRUE)
 }
 \keyword{classif}
 \keyword{multivariate}
