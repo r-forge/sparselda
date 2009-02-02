@@ -196,6 +196,7 @@ smda.default <- function(x, y, Z = NULL, Rj = NULL, lambda=1e-6, stop, maxIte=50
                  beta = b,
                  theta = theta,
                  Z = Z,
+                 Zhat = Zhat,
                  Rj = Rj,
                  varNames = varNames,
                  varIndex = which(notZero),
@@ -221,7 +222,7 @@ predict.smda <- function(object, newdata = NULL, ...)
       }
     x <- newdata %*% object$beta
     subPred <- predict(object$fit, newdata = x, ...)
-    ## Should we compute the posterior probs per class (not subclass) and get the class from that?      
+    ## We compute the posterior probs per class (not subclass) and get the class from that      
     subPred$class <- unlist(lapply(strsplit(as.character(subPred$class), "\\|"), function(x)x[1]))
     subPred$class <- factor(subPred$class, levels = object$classes)
     subPred

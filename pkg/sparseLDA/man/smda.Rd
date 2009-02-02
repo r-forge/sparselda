@@ -1,12 +1,18 @@
 \name{smda}
 \alias{smda}
+\alias{smda.default}
 \title{Sparse mixture discriminant analysis}
 \description{Performs sparse linear discriminant analysis for mixture of gaussians models.}
 \usage{
-smda(X,Z,Rj,lambda=1e-6,stop,maxIte=50,trace=FALSE,tol=1e-4)
+smda(x, ...)
+
+\method{smda}{default}(x, y, Z = NULL, Rj = NULL, 
+     lambda = 1e-6, stop, maxIte = 50, 
+     trace = FALSE, tol = 1e-4, ...)
 }
 \arguments{
-  \item{X}{A matrix of the training data with observations down the rows and variables in the columns.}
+  \item{x}{A matrix of the training data with observations down the rows and variables in the columns.}
+\item{y}{A matrix initializing the dummy variables representing the groups.}
   \item{Z}{A matrix initializing the probabilities
   representing the groups.}
   \item{Rj}{K length vector containing the number of
@@ -25,6 +31,7 @@ smda(X,Z,Rj,lambda=1e-6,stop,maxIte=50,trace=FALSE,tol=1e-4)
   \item{trace}{If TRUE, prints out its progress. Default: FALSE.}
  
   \item{tol}{Tolerance for the stopping criterion (change in RSS). Default: 1e-4}
+\item{\ldots}{additional arguments}
 }
 
 \value{Returns a list with the following attributes:
@@ -53,41 +60,36 @@ data(penicilliumYES)
 X <- penicilliumYES$X
 Z <- penicilliumYES$Z
 
-# test samples
-Iout<-c(3,6,9,12)
-Iout<-c(Iout,Iout+12,Iout+24)
-# training data
-Xtr<-X[-Iout,]
-k<-3
-n<-dim(Xtr)[1]
-Rj <- c(4,4,4)
+## test samples
+Iout <- c(3, 6, 9, 12)
+Iout <- c(Iout, Iout+12, Iout+24)
 
-# Normalize data
-Xc<-normalize(Xtr)
-Xn<-Xc$Xc
-p<-dim(Xn)[2]
+## training data
+Xtr <- X[-Iout,]
+k <- 3
+n <- dim(Xtr)[1]
+Rj <- c(4, 4, 4)
 
-# perform SMDA with one non-zero loading for each discriminative
-# direction
-out<-smda(Xn,Z,Rj,lambda=1e-6,-5,maxIte=10,trace=TRUE,tol=1e-2)
+## Normalize data
+Xc <- normalize(Xtr)
+Xn <- Xc$Xc
+p <- dim(Xn)[2]
 
-# training
-require("MASS")
-sl<-Xn\%*\%out$beta
-lobj<-lda(sl,c(rep(1,2),rep(2,2),rep(3,2),rep(4,2),rep(5,2),rep(6,2),rep(7,2),rep(8,2),rep(9,2),rep(10,2),rep(11,2),rep(12,2)))
-train <- predict(lobj, sl)
+## perform SMDA with one non-zero loading for each discriminative
+## direction
+smdaFit <- smda(Xn, Z, Rj,
+                lambda = 1e-6,
+                stop = -5,
+                maxIte = 10,
+                trace = TRUE,
+                tol = 1e-2)
 
 # testing
-Xtst<-X[Iout,]
-Xtst<-normalizetest(Xtst,Xc)
-sltr<-Xtst\%*\%out$beta
-test <- predict(lobj, sltr, prior = lobj$prior, k)
-# class 1
-as.numeric(test$class)<5
-# class 2
-as.numeric(test$class)>=5&as.numeric(test$class)<9
-# class 3
-as.numeric(test$class)>=9
+Xtst <- X[Iout,]
+Xtst <- normalizetest(Xtst, Xc)
+
+test <- predict(smdaFit, Xtst)
+
 }
 \keyword{classif}
 \keyword{multivariate}

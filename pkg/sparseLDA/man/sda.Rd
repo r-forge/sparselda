@@ -5,9 +5,10 @@
 \description{Performs sparse linear discriminant analysis. Using an alternating minimization algorithm to minimize the SDA
 criterion.}
 \usage{
-sda (x, ...)
+sda(x, ...)
 
-\method{sda}{default}(x,y,lambda=1e-6,stop,maxIte=100,trace=FALSE,tol=1e-6, ...)
+\method{sda}{default}(x, y, lambda = 1e-6, stop, maxIte = 100,
+    trace = FALSE, tol = 1e-6, ...)
 }
 \arguments{
 \item{x}{A matrix of the training data with observations down the rows and variables in the columns.}

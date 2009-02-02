@@ -4,7 +4,7 @@
 \description{
 
 The data set \code{penicilliumYES} has 36 rows and 3754 columns. The variables are 
-1st order statistics from multi-spectral images of three species of emph{Penicillium} fungi: 
+1st order statistics from multi-spectral images of three species of \emph{Penicillium} fungi: 
 \emph{Melanoconidium, Polonicum,} and \emph{Venetum}.
 These are the data used in the Clemmemsen et al "Sparse Discriminant Analysis" paper.
 }
