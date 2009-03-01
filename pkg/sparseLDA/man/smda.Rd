@@ -12,8 +12,8 @@ smda(x, ...)
 }
 \arguments{
   \item{x}{A matrix of the training data with observations down the rows and variables in the columns.}
-\item{y}{A matrix initializing the dummy variables representing the groups.}
-  \item{Z}{A matrix initializing the probabilities
+  \item{y}{A matrix initializing the dummy variables representing the groups.}
+  \item{Z}{Am optional matrix initializing the probabilities
   representing the groups.}
   \item{Rj}{K length vector containing the number of
   subclasses in each of the K classes.}
@@ -31,16 +31,15 @@ smda(x, ...)
   \item{trace}{If TRUE, prints out its progress. Default: FALSE.}
  
   \item{tol}{Tolerance for the stopping criterion (change in RSS). Default: 1e-4}
-\item{\ldots}{additional arguments}
+  \item{\ldots}{additional arguments}
 }
 
 \value{Returns a list with the following attributes:
-\item{beta}{The loadings of the sparse discriminative
-directions.}
-
+\item{call}{The call}
+\item{beta}{The loadings of the sparse discriminative directions.}
 \item{theta}{The optimal scores.}
 \item{Z}{Updated subclass probabilities.}
-
+\item{Rj}{a vector of the number of ssubclasses per class}
 \item{rss}{A vector of the Residual Sum of Squares at
 each iteration.}
 }
@@ -58,6 +57,7 @@ analysis", Technical report, IMM, Technical University of Denmark
 # load data
 data(penicilliumYES)
 X <- penicilliumYES$X
+Y <- penicilliumYES$Y
 Z <- penicilliumYES$Z
 
 ## test samples
@@ -68,7 +68,7 @@ Iout <- c(Iout, Iout+12, Iout+24)
 Xtr <- X[-Iout,]
 k <- 3
 n <- dim(Xtr)[1]
-Rj <- c(4, 4, 4)
+Rj <- rep(4, 3)
 
 ## Normalize data
 Xc <- normalize(Xtr)
@@ -77,7 +77,10 @@ p <- dim(Xn)[2]
 
 ## perform SMDA with one non-zero loading for each discriminative
 ## direction
-smdaFit <- smda(Xn, Z, Rj,
+smdaFit <- smda(x = Xn,
+                y = Y, 
+                Z = Z, 
+                Rj = Rj,
                 lambda = 1e-6,
                 stop = -5,
                 maxIte = 10,

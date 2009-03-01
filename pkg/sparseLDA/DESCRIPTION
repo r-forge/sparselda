@@ -1,6 +1,6 @@
 Package: sparseLDA
-Version: 0.1-3
-Date: 2009-02-01
+Version: 0.1-4
+Date: 2009-02-28
 Title: Sparse Discriminant Analysis
 Author: Line Clemmensen <lhc@imm.dtu.dk>, contributions by Max Kuhn
 Maintainer: Line Clemmensen <lhc@imm.dtu.dk>

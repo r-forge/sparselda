@@ -55,11 +55,16 @@ smda.default <- function(x, y, Z = NULL, Rj = NULL, lambda=1e-6, stop, maxIte=50
     }
 
   if(is.null(Rj)) Rj <- rep(3, length(classes))
-
-  subClasses <- paste(rep(classes, times = Rj),
-                      1:sum(Rj),
-                      sep = "|")
+  if(length(Rj) == 1) Rj <- rep(Rj, length(classes))
+ 
   classKey <- rep(classes, times = Rj)
+
+  subClasses <- classKey
+  for(i in seq(along = classes))
+    {
+      tmp <- subClasses[subClasses == classes[i]]
+      subClasses[subClasses == classes[i]] <- paste(tmp, seq(along = tmp), sep = "|")
+    }
   
   if(!is.matrix(x)) x <- as.matrix(x)
   predNames <- colnames(x)
@@ -72,7 +77,7 @@ smda.default <- function(x, y, Z = NULL, Rj = NULL, lambda=1e-6, stop, maxIte=50
   if(is.null(Z))
     {
       library(mda)
-      tmp <- mda.start(x, factorY, subclasses = Rj)
+      tmp <- mda.start(x, factorY, subclasses = Rj,  start.method = "lvq")
       Z <- matrix(0, nrow = nrow(x), ncol = sum(Rj))
       for(i in seq(along = tmp))
         {

@@ -12,4 +12,5 @@ S3method(predict, sda)
 S3method(predict, smda)
 
 S3method(print, sda)
+S3method(print, smda)
 
