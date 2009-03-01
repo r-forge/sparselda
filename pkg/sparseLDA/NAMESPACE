@@ -2,6 +2,8 @@ export(
        normalize,
        normalizetest,
        sda,
+       predict.smda,
+       predict.sda,
        smda)
 
 
