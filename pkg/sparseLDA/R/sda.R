@@ -63,21 +63,21 @@ sda.default <- function(x, y, lambda=1e-6, stop, maxIte=100, trace=FALSE, tol=1e
 
   Dpi <- t(y)%*%y/n ## diagonal matrix of class priors
   Dpi_inv <- diag(1/sqrt(diag(Dpi)))
-  theta <- 1/sum(diag(Dpi))*diag(rep(1,K))[,1:K-1]/K
+  theta <- 1/sum(diag(Dpi))*diag(rep(1,K))[,1:K]/K
   Ytheta <- y%*%theta
-  if (length(stop)< (K-1)){
-    stop <- rep(stop[1],1,K-1)
+  if (length(stop)< (K)){
+    stop <- rep(stop[1],1,K)
   }
   if (stop[1]<0) sparse <- "varnum" else sparse <- "penalty" 
-  Yhat <- matrix(0,n,K-1)
-  b <- matrix(0,p,K-1)
+  Yhat <- matrix(0,n,K)
+  b <- matrix(0,p,K)
   rss <- rep(0,maxIte)
 
   while (abs(RSSold-RSS)/RSS > tol & ite < maxIte){ 
     RSSold <- RSS
     ite <- ite + 1
     ## 1. Estimate beta:    
-    for (j in 1:(K-1)){
+    for (j in 1:K){
       Yc <- Ytheta[,j] 
       beta<- solvebeta(x, Yc, paras=c(lambda, abs(stop[j])),sparse=sparse)
       b[,j] <- t(beta)
@@ -86,27 +86,33 @@ sda.default <- function(x, y, lambda=1e-6, stop, maxIte=100, trace=FALSE, tol=1e
     
     ## 2. Optimal scores: (balanced Procrustes problem)
     B <- t(y)%*%Yhat
-    sb <- svd(B,nu=K-1,nv=K-1)
+    sb <- svd(B,nu=K,nv=K)
     theta.old <- theta
     theta <- Dpi_inv%*%sb$u%*%t(sb$v)
     Ytheta <- y%*%theta
-    RSS <- sum((Ytheta-Yhat)*(Ytheta-Yhat))
+    RSS <- sum((Ytheta-Yhat)*(Ytheta-Yhat)) + lambda*sum(b*b)
     rss[ite] <- RSS
     if (trace){ 
-      cat('ite: ', ite, ' RSS: ', RSS,'\n')
+      cat('ite: ', ite, ' ridge cost: ', RSS, ' |b|_1: ', sum(abs(b)),'\n')
     }
   }
   rss <- rss[1:ite]
-
-  for (j in 1:(K-1)){
+## remove trivial directions
+  Ik <- sb$d > 1e-6
+  M <- sum(Ik)
+  theta <- theta[,1:M,drop = FALSE]
+  Ytheta <- y%*%theta
+  b <- b[,1:M,drop = FALSE]
+  
+  for (j in 1:M){
     Yc <- Ytheta[,j]
     beta<- solvebeta(x, Yc, paras=c(lambda, abs(stop[j])),sparse=sparse)
     b[,j] <- t(beta)
     Yhat[,j] <- x%*%b[,j]
   }    
   if (trace){
-    RSS <- sum((Ytheta-Yhat)*(Ytheta-Yhat))
-    cat('final update, RSS: ', RSS,'\n')
+    RSS <- sum((Ytheta-Yhat)*(Ytheta-Yhat)) + lambda*sum(b*b)
+    cat('final update, ridge cost: ', RSS, ' |b|_1: ', sum(abs(b)),'\n')
   }
 
   notZero <- apply(b, 1, function(x) any(x != 0))
@@ -184,4 +190,6 @@ predict.sda <- function(object, newdata = NULL, ...)
 
 
 ## todo: plot and summary 
+
+
 
