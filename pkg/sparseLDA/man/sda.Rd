@@ -7,8 +7,8 @@ criterion.}
 \usage{
 sda(x, ...)
 
-\method{sda}{default}(x, y, lambda = 1e-6, stop, maxIte = 100,
-    trace = FALSE, tol = 1e-6, ...)
+\method{sda}{default}(x, y, lambda = 1e-6, stop = -p, maxIte = 100,
+    Q = K-1, trace = FALSE, tol = 1e-6, ...)
 }
 \arguments{
 \item{x}{A matrix of the training data with observations down the rows and variables in the columns.}
@@ -22,9 +22,11 @@ regression. Default: 1e-6.}
 corresponds to the desired number of variables. If STOP is
 positive, it corresponds to an upper bound on the L1-norm of the b
 coefficients. There is a one to one correspondence between stop
-and t.}
+and t. The default is -p (-the number of variables).}
 
 \item{maxIte}{Maximum number of iterations. Default: 100.}
+
+\item{Q}{Number of components. Maximum and default is K-1 (the number of classes less one).}
 
 \item{trace}{If TRUE, prints out its progress. Default:
 FALSE.}
@@ -41,18 +43,20 @@ directions.}
 
 \item{rss}{A vector of the Residual Sum of Squares at
 each iteration.}
+
+\item{varNames}{Names on included variables}.
 }
 \details{
 The function finds sparse directions for linear classification.
 }
 \references{
-Clemmensen, L., Hastie, T. and Ersboell, K. (2007) "Sparse discriminant
-analysis", Technical report, IMM, Technical University of Denmark
+Clemmensen, L., Hastie, T. Witten, D. and Ersboell, K. (2011) "Sparse discriminant
+analysis", Technometrics, To appear.
 }
 \seealso{
 \code{\link{normalize}, \link{normalizetest}, \link{smda}}
 }
-\author{Line Clemmensen}
+\author{Line Clemmensen, modified by Trevor Hastie}
 \examples{
 ## load data
 data(penicilliumYES)
@@ -62,7 +66,6 @@ Y <- penicilliumYES$Y
 colnames(Y) <- c("P. Melanoconidium",
                  "P. Polonicum",
                  "P. Venetum")
-
 
 ## test samples
 Iout<-c(3,6,9,12)

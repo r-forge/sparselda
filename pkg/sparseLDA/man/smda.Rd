@@ -7,7 +7,7 @@
 smda(x, ...)
 
 \method{smda}{default}(x, y, Z = NULL, Rj = NULL, 
-     lambda = 1e-6, stop, maxIte = 50, 
+     lambda = 1e-6, stop, maxIte = 50, Q=R-1,
      trace = FALSE, tol = 1e-4, ...)
 }
 \arguments{
@@ -27,6 +27,8 @@ smda(x, ...)
   and t.}
 
   \item{maxIte}{Maximum number of iterations. Default: 50.}
+  
+  \item{Q}{The number of components to include. Maximum and default is R-1 (total number of subclasses less one).}
 
   \item{trace}{If TRUE, prints out its progress. Default: FALSE.}
  
@@ -46,8 +48,8 @@ each iteration.}
 \details{
 The function finds sparse directions for linear classification of mixture og gaussians models.
 }\references{
-Clemmensen, L., Hastie, T. and Ersboell, K. (2007) "Sparse discriminant
-analysis", Technical report, IMM, Technical University of Denmark
+Clemmensen, L., Hastie, T., Witten, D. and Ersboell, K. (2007) "Sparse discriminant
+analysis", Technometrics, To appear.
 }
 \seealso{
 \code{\link{normalize}}, \code{\link{normalizetest}}, \code{\link{sda}}
