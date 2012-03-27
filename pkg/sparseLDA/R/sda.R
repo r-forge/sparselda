@@ -177,18 +177,19 @@ sda.default <- function(x, y, lambda=1e-6, stop=-p, maxIte=100, Q=K-1, trace=FAL
       } else {
         if(ncol(newdata) != object$origP) stop("dimensions of training and testing X different")
         newdata <- newdata[, object$varIndex, drop = FALSE]
- 
+        
       }
-      xnew <- newdata %*% object$beta
-      pred <- predict(object$fit,xnew)
+    xnew <- newdata %*% object$beta
+    pred <- predict(object$fit,xnew)
+    pred
     
-      }
+  }
       
    print.sda <- function(x, digits = max(3, getOption("digits") - 3), ...)
     {
     cat("\nCall:\n", deparse(x$call), "\n\n", sep = "")
  
-    classInfo <- paste(paste(x$classes, " (", x$Rj, ")", sep = ""), collapse = ", ")
+    classInfo <- paste(x$classes, collapse = ", ")
 
     if(all(x$stop < 0))
       {
