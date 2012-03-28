@@ -274,8 +274,8 @@ predict.smda <- function(object, newdata = NULL, ...)
     #subPred$class <- factor(subPred$class, levels = object$classes)
     #subPred
     list(class=class,
-         classprob = pr,
-         subprob = Zt)
+         classprob = pr/apply(pr,1,sum),
+         subprob = Zt/apply(Zt,1,sum))
   }
 
 
